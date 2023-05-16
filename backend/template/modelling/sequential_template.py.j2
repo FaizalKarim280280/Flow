@@ -1,6 +1,6 @@
 
 self.{{ block }} = nn.Sequential(
     {% for layer in layers %}
-        {{- layer }}{% if not loop.last %}, {% endif %}
+        {{- layer }},
     {% endfor %}
 )

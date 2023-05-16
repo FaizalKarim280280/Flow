@@ -16,19 +16,55 @@ class Layer:
         self.is_output = is_output
 
 
+class Input:
+    def __init__(self, input_shape):
+        self.input_shape = input_shape
+
+
 class Dropout():
-    pass
+    def __init__(self, drop):
+        self.drop = drop
+        self.dropout_template = env.get_template('layers/dropout_template.py.j2')
+
+    def get_code(self):
+        code = self.dropout_template.render({
+            'drop': self.drop
+        })
+
+        return code
 
 
-class MaxPool2d():
-    pass
+class MaxPool2d(Layer):
+    def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
+        self.return_indices = return_indices
+        self.ceil_mode = ceil_mode
+        self.maxpool1d_template = env.get_template('layers/maxpool2d_template.py.j2')
+
+    def get_code(self):
+        code = self.maxpool1d_template.render(
+            {
+                'kernel_size': self.kernel_size,
+                'stride': self.stride,
+                'padding': self.padding,
+                'dilation': self.dilation,
+                'return_indices': self.return_indices,
+                'ceil_mode': self.ceil_mode
+            }
+        )
+
+        return code
 
 
 class MaxPool1d():
     pass
 
 
-class Conv1d():
+class Conv1d(Layer):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', is_input=False, is_output=False):
         super().__init__(is_input, is_output)
         self.in_channels = in_channels
@@ -41,7 +77,7 @@ class Conv1d():
         self.bias = bias
         self.padding_mode = padding_mode
 
-        self.conv2d_template = env.get_template('conv2d_template.py.j2')
+        self.conv2d_template = env.get_template('layers/conv1d_template.py.j2')
 
     def get_code(self):
         code = self.conv2d_template.render(
@@ -60,9 +96,8 @@ class Conv1d():
         return code
 
 
-
 class Conv2d(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', is_input=False, is_output=False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', is_input=False, is_output=False, activation=None, dropout= None):
         super().__init__(is_input, is_output)
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -73,8 +108,9 @@ class Conv2d(Layer):
         self.groups = groups
         self.bias = bias
         self.padding_mode = padding_mode
-
-        self.conv2d_template = env.get_template('conv2d_template.py.j2')
+        self.activation = activation
+        self.dropout = dropout
+        self.conv2d_template = env.get_template('layers/conv2d_template.py.j2')
 
     def get_code(self):
         code = self.conv2d_template.render(
@@ -90,17 +126,26 @@ class Conv2d(Layer):
                 "padding_mode": self.padding_mode
             }
         )
+        
+        if self.activation:
+            code = code + "\n" + env.get_template("/activations/{}_template.py.j2".format(self.activation)).render()
+            
+        if self.dropout:
+            code = code + "\n" + Dropout(self.dropout).get_code()   
+            
         return code
 
 
 class Linear(Layer):
-    def __init__(self, in_features, out_features, bias=True, is_input=False, is_output=False):
+    def __init__(self, in_features, out_features, bias=True, is_input=False, is_output=False, activation = None, dropout = None):
         super().__init__(is_input, is_output)
         self.in_features = in_features
         self.out_features = out_features
         self.bias = bias
-        self.linear_template = env.get_template('linear_template.py.j2')
-
+        self.linear_template = env.get_template('layers/linear_template.py.j2')
+        self.activation = activation
+        self.dropout = dropout
+        
     def get_code(self):
         code = self.linear_template.render(
             {
@@ -109,15 +154,39 @@ class Linear(Layer):
                 'bias': self.bias,
             }
         )
+        
+        if self.activation:
+            code = code + "\n" + env.get_template("/activations/{}_template.py.j2".format(self.activation)).render()
+            
+        if self.dropout:
+            code = code + "\n" + Dropout(self.dropout).get_code()    
 
         return code
 
+class Flatten():
+    def __init__(self, start_dim = 1, end_dim = -1):
+        self.start_dim = start_dim
+        self.end_dim = end_dim
+        self.flatten_template = env.get_template('layers/flatten_template.py.j2')
 
+    def get_code(self):
+        code = self.flatten_template.render({
+            'start_dim' : self.start_dim, 
+            'end_dim' : self.end_dim
+        })
+        
+        return code
+    
 def main():
-    conv2d = Conv2d(3, 32, 3, stride = 5)
+    conv2d = Conv2d(3, 32, 3, stride=5, activation= 'relu')
     linear = Linear(128, 64)
+    maxpool1d = MaxPool2d(kernel_size=3, stride=2, padding=3)
+    dropout = Dropout(0.2)
+
+    print(maxpool1d.get_code())
     print(conv2d.get_code())
     print(linear.get_code())
+    print(dropout.get_code())
 
 
 if __name__ == "__main__":

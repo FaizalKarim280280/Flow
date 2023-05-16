@@ -5,7 +5,6 @@ import torch.nn.functional as F
 class {{ model_name }}(nn.Module):
     def __init__(self):
         super({{ model_name }}, self).__init__()
-        self.fc = nn.Linear({{ input_size }}, {{ output_size }})
 
         {% for bl in blocks %}
             {{ bl|indent(8) }}
