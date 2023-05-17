@@ -22,7 +22,7 @@ def main():
     for node in dfs_nodes:
         print(node)
         
-    nx.draw(graph, with_labels=True, node_size=1000, node_color='lightblue', font_weight='bold')
+    nx.draw(graph, with_labels=True, node_size=1000, node_color='lightblue', font_weight='bold') # type: ignore
     plt.show()
 
 if __name__ == "__main__":
