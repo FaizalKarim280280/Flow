@@ -1,6 +1,6 @@
 import os
 import networkx as nx
-from layer import Conv2d, Linear, Dropout, Input, Flatten
+from layer import Conv2d, Linear, Dropout, Input, Flatten, MaxPool2d
 import matplotlib.pyplot as plt
 from jinja2 import Environment, FileSystemLoader
 import re
@@ -14,12 +14,15 @@ def main():
 
         'inp': Input((3, 224, 224)),
         'conv2d_1': Conv2d(3, 32, kernel_size=3, stride=2, padding=1, dropout = 0.2, activation = 'relu'),
+        'maxpool2d_1': MaxPool2d((2,2)),
         'conv2d_2': Conv2d(32, 64, kernel_size=3, stride=2, padding=1, dropout = 0.2),
+        'maxpool2d_2': MaxPool2d((2,2)),
         'conv2d_3': Conv2d(64, 128, kernel_size=3, stride=2, padding=1, dropout = 0.2),
+        'maxpool2d_3': MaxPool2d((2,2)),
         'flatten': Flatten(),
-        'fc1': Linear(1024, 512, activation='relu', dropout = 0.2),
+        'fc1': Linear(1152, 512, activation='relu', dropout = 0.2),
         'fc2': Linear(512, 128, activation='tanh', dropout = 0.2),
-        'fc3': Linear(128, 10, dropout = 0.1)
+        'fc3': Linear(128, 10)
     }
 
     for node in model_dict.keys():
@@ -27,24 +30,47 @@ def main():
         
         
     graph.add_edge('inp', 'conv2d_1')
-    graph.add_edge('conv2d_1', 'conv2d_2')
-    graph.add_edge('conv2d_2', 'conv2d_3')
-    graph.add_edge('conv2d_3', 'flatten')
+    graph.add_edge('conv2d_1', 'maxpool2d_1')
+    graph.add_edge('maxpool2d_1', 'conv2d_2')
+    graph.add_edge('conv2d_2', 'maxpool2d_2')
+    graph.add_edge('maxpool2d_2', 'conv2d_3')
+    graph.add_edge('conv2d_3', 'maxpool2d_3')
+    graph.add_edge('maxpool2d_3', 'flatten')
     graph.add_edge('flatten', 'fc1')
     graph.add_edge('fc1', 'fc2')
     graph.add_edge('fc2', 'fc3')
     
-    layers = []
+    layers, shapes = [], []
     
     dfs = nx.dfs_preorder_nodes(graph, source='inp')
-    for node in dfs:
-        if node != 'inp':
-            layers.extend(model_dict[node].get_code().split("\n"))
+    curr_out_shape = 0
     
+    for node in dfs:
+        node = model_dict[node]
+        if not isinstance(node, Input):
+            node.input_shape = curr_out_shape 
+            node.calculate_output_shape()
+            layers.append(node.get_code())
+            if isinstance(node.output_shape, list):
+                shapes.append([str(num) for num in node.output_shape])
+            else:
+                shapes.append([node.output_shape])
+                
+        curr_out_shape = node.output_shape        
+        
+        # print(node)
+        # print("Input:", node.input_shape)
+        # print("Output:", node.output_shape)
+        # print("\n\n")
+
+
+    # print(layers[0])
+
+    layer_shapes = zip(layers, shapes)
     
     sequential_blocks = env.get_template('modelling/sequential_template.py.j2').render({
         'block' : 'block1',
-        'layers' : layers
+        'layer_shapes' : layer_shapes
     })
     
     model = env.get_template('modelling/model_template.py.j2').render({
@@ -54,63 +80,10 @@ def main():
     
     model = re.sub(r'\n\s*\n\s*\n', r'\n\n', model)
     
-    with open('output.txt', 'w+') as f:
+    with open('output.py', 'w+') as f:
         f.write(model)
         f.close()
 
 
 if __name__ == "__main__":
     main()
-
-
-# def generate_code(layers, return_model=False):
-#     code, input_var, output_var = "", "", ""
-#     curr_layer, prev_layer = layers, None
-
-#     var, prev_var = None, None
-#     input_layers, output_layers = [], []
-
-#     while curr_layer is not None:
-#         prev_var = var
-#         var, code_temp = curr_layer.layer2code()
-#         code = code + code_temp
-
-#         if var.split('_')[0] == 'inp':
-#             input_var = var
-#             input_layers.append(code_temp)
-#         if var.split('_')[0] == 'out':
-#             output_var = var
-#             output_layers.append(code_temp)
-
-#         if not curr_layer.input_layer:
-#             code = code + "({})".format(prev_var)
-
-#         prev_layer = curr_layer
-#         curr_layer = curr_layer.next
-
-#         code = code + "\n"
-
-#     if return_model:
-
-#         code = code + "\n" + "model = keras.models.Model(inputs = {} output = {})"\
-#             .format(input_var, output_var)
-
-#     return code, input_layers, output_layers
-
-
-# def main():
-    # layers = []
-
-    # inp1 = Dense(100, 'relu', input_layer=True)
-    # inp1.next = Dense(200, 'sigmoid')
-    # inp1.next.next = Dense(200, 'tanh')
-    # inp1.next.next.next = Dense(50, activation='relu')
-    # inp1.next.next.next.next = Dense(135, activation='tanh')
-    # inp1.next.next.next.next.next = Dense(10, 'softmax', output_layer=True)
-
-    # code, inp, out = generate_code(inp1)
-
-    # print(code)
-
-    # print("Input:", inp)
-    # print("Output:", out)
