@@ -12,7 +12,7 @@ export default function Linear(props) {
 
             <div
                 style={{
-                    width: '50px',
+                    width: '80px',
                     height: '300px',
                     background: '#B39DDB',
                     border: '1px solid',
@@ -21,8 +21,8 @@ export default function Linear(props) {
                     opacity: props.data['opacity'],
                 }}>
 
-                <div className='flex flex-column'>
-                    <p className='p-1'>Linear</p>
+                <div className='flex flex-column justify-center'>
+                    <p className='p-1'>{props.id}</p>
                 </div>
             </div>
 

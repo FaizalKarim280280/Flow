@@ -5,6 +5,8 @@ import { useState, useCallback } from 'react';
 import Conv1d from './layers/Conv1d';
 import Conv2d from './layers/Conv2d';
 import Linear from './layers/Linear';
+import {NodeProperties} from "./NodeProperties";
+import {ComponentsPanel} from "./ComponentsPanel";
 
 // define the node types
 const nodeTypes = {
@@ -51,12 +53,13 @@ const Flow = () => {
         [setEdges]
     );
 
-    const handleOnClick = () => {
-        console.log(edges);
-    }
+    // const handleOnClick = () => {
+    //     console.log(edges);
+    // }
     const [conv1dCount, setConv1dCount] = useState(2);
     const [conv2dCount, setConv2dCount] = useState(2);
     const [linearCount, setLinearCount] = useState(2);
+    const [selectedNode, setSelectedNode] = useState(null);
 
     // button to add new conv1d layer
     const handleAddConv1d = () => {
@@ -70,11 +73,16 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv1d',
                 data: { opacity: '0.8' },
+                parameters : {
+                    in_channels : {},
+                    out_channels : {},
+                    kernel_size : {},
+                    stride : {},
+                    padding : {},
+                }
             },
         ]);
     };
-
-
 
     const handleAddConv2d = () => {
         setConv2dCount((prevCount) => prevCount + 1);
@@ -87,6 +95,13 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv2d',
                 data: { opacity: '0.8' },
+                parameters : {
+                    in_channels : {},
+                    out_channels : {},
+                    kernel_size : {},
+                    stride : {},
+                    padding : {},
+                }
             },
         ]);
     };
@@ -102,6 +117,11 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'linear',
                 data: { opacity: '0.8' },
+                parameters : {
+                    in_features : {},
+                    out_features : {},
+                    bias : {},
+                }
             },
         ]);
     };
@@ -110,6 +130,7 @@ const Flow = () => {
     // when a node is dragged reduce its opacity to 0.5
     const handleOnNodeDragStart = (event, node) => {
         node.data['opacity'] = 0.5;
+        setSelectedNode(node);
     }
 
     // when dragging is stopped, revert back to the previous value
@@ -130,56 +151,23 @@ const Flow = () => {
         };
     };
 
+    const clearSelectedNode = () => {
+        setSelectedNode(null);
+    };
+
+    // const handleOnNodeClick = (event, node) => {
+    //     setSelectedNode(node);
+    // };
+
 
     return (
         <>
-        <div className='flex-none border-2 border-black px-8'>
-
-            <div className='flex flex-col items-center justify-center'>
-                Components
-                {/*<div className='py-8'>*/}
-                {/*    <button*/}
-                {/*        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'*/}
-                {/*        onClick={handleOnClick}>*/}
-                {/*        Button*/}
-                {/*    </button>*/}
-                {/*</div>*/}
-                <div className='py-8'>
-                    <button
-                        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                        onClick={handleAddConv1d}
-                    >
-                        Add Conv1d
-                    </button>
-                </div>
-                <div className='py-8'>
-                    <button
-                        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                        onClick={handleAddConv2d}
-                    >
-                        Add Conv2d
-                    </button>
-                </div>
-                <div className='py-8'>
-                    <button
-                        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                        onClick={handleAddLinear}
-                    >
-                        Add Linear
-                    </button>
-                </div>
-                <div className='py-8'>
-                    <button
-                        className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
-                        onClick={handleClearAll}
-                    >
-                        Clear All
-                    </button>
-                </div>
-            </div>
-
-
-        </div>
+            <ComponentsPanel
+                handleAddConv1d={handleAddConv1d}
+                handleAddConv2d={handleAddConv2d}
+                handleAddLinear={handleAddLinear}
+                handleClearAll={handleClearAll}
+            />
         <div className='flex-grow'>
             <ReactFlow
                 nodes={nodes}
@@ -190,11 +178,16 @@ const Flow = () => {
                 nodeTypes={nodeTypes}
                 onNodeDragStart={handleOnNodeDragStart}
                 onNodeDragStop={handleOnNodeDragStop}
+                onClick={clearSelectedNode}
+                // onNodeClick={handleOnNodeClick}
             >
                 <Background />
                 <Controls />
             </ReactFlow>
         </div>
+            <div className='flex-none border-2 border-black px-8'>
+                <NodeProperties selectedNode={selectedNode} />
+            </div>
         </>
     )
 };
