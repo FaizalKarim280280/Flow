@@ -20,8 +20,8 @@ def main():
         'conv2d_3': Conv2d(64, 128, kernel_size=3, stride=2, padding=1, dropout = 0.2),
         'maxpool2d_3': MaxPool2d((2,2)),
         'flatten': Flatten(),
-        'fc1': Linear(1152, 512, activation='relu', dropout = 0.2),
-        'fc2': Linear(512, 128, activation='tanh', dropout = 0.2),
+        'fc1': Linear(1152, 256, activation='relu', dropout = 0.2),
+        'fc2': Linear(256, 128, activation='tanh', dropout = 0.2),
         'fc3': Linear(128, 10)
     }
 
@@ -47,10 +47,12 @@ def main():
     
     for node in dfs:
         node = model_dict[node]
+        
         if not isinstance(node, Input):
             node.input_shape = curr_out_shape 
             node.calculate_output_shape()
             layers.append(node.get_code())
+        
             if isinstance(node.output_shape, list):
                 shapes.append([str(num) for num in node.output_shape])
             else:
