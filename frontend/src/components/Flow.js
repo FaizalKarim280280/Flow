@@ -20,33 +20,10 @@ let nums = {
     linear: 1
 }
 
-export default function Flow() {
+const Flow = () => {
 
     // list of sample nodes
-    const initialNodes = [
-        {
-            id: 'conv1d_' + nums['conv1d'],
-            position: { x: 0, y: 0 },
-            type: 'conv1d',
-            data: { opacity: 0.8 }
-
-        },
-        {
-            id: 'conv2d_' + nums['conv2d'],
-            position: { x: 100, y: 100 },
-            type: 'conv2d',
-            data: { opacity: 0.8 }
-        },
-
-        {
-            id: 'linear',
-            position: { x: 200, y: 100 },
-            type: 'linear',
-            data: { opacity: 0.8 }
-        },
-    ];
-
-
+    const initialNodes = [];
 
     const initialEdges = [
         // { id: 'edge-1', source: '2', target: '1', sourceHandle: 'left'}
@@ -77,18 +54,58 @@ export default function Flow() {
     const handleOnClick = () => {
         console.log(edges);
     }
+    const [conv1dCount, setConv1dCount] = useState(2);
+    const [conv2dCount, setConv2dCount] = useState(2);
+    const [linearCount, setLinearCount] = useState(2);
 
     // button to add new conv1d layer
     const handleAddConv1d = () => {
-        nums['conv1d'] += 1;
-        const id = 'conv1d_' + nums['conv1d']
+        setConv1dCount((prevCount) => prevCount + 1);
+        const id = 'conv1d_' + conv1dCount;
 
-        setNodes((prev) => [...prev, {
-            id: id,
-            position: { x: 300, y: 300 },
-            type: 'conv1d'
-        }])
-    }
+        setNodes((prev) => [
+            ...prev,
+            {
+                id: id,
+                position: { x: 0, y: 0 },
+                type: 'conv1d',
+                data: { opacity: '0.8' },
+            },
+        ]);
+    };
+
+
+
+    const handleAddConv2d = () => {
+        setConv2dCount((prevCount) => prevCount + 1);
+        const id = 'conv2d_' + conv2dCount;
+
+        setNodes((prev) => [
+            ...prev,
+            {
+                id: id,
+                position: { x: 0, y: 0 },
+                type: 'conv2d',
+                data: { opacity: '0.8' },
+            },
+        ]);
+    };
+
+    const handleAddLinear = () => {
+        setLinearCount((prevCount) => prevCount + 1);
+        const id = 'linear_' + linearCount;
+
+        setNodes((prev) => [
+            ...prev,
+            {
+                id: id,
+                position: { x: 0, y: 0 },
+                type: 'linear',
+                data: { opacity: '0.8' },
+            },
+        ]);
+    };
+
 
     // when a node is dragged reduce its opacity to 0.5
     const handleOnNodeDragStart = (event, node) => {
@@ -100,11 +117,70 @@ export default function Flow() {
         node.data['opacity'] = 0.8;
     }
 
-
+    const handleClearAll = () => {
+        setNodes([]);
+        setEdges([]);
+        setConv1dCount(1);
+        setConv2dCount(1);
+        setLinearCount(1);
+        nums = {
+            conv1d: 1,
+            conv2d: 1,
+            linear: 1,
+        };
+    };
 
 
     return (
-        <div style={{ height: "600px" }}>
+        <>
+        <div className='flex-none border-2 border-black px-8'>
+
+            <div className='flex flex-col items-center justify-center'>
+                Components
+                {/*<div className='py-8'>*/}
+                {/*    <button*/}
+                {/*        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'*/}
+                {/*        onClick={handleOnClick}>*/}
+                {/*        Button*/}
+                {/*    </button>*/}
+                {/*</div>*/}
+                <div className='py-8'>
+                    <button
+                        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+                        onClick={handleAddConv1d}
+                    >
+                        Add Conv1d
+                    </button>
+                </div>
+                <div className='py-8'>
+                    <button
+                        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+                        onClick={handleAddConv2d}
+                    >
+                        Add Conv2d
+                    </button>
+                </div>
+                <div className='py-8'>
+                    <button
+                        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+                        onClick={handleAddLinear}
+                    >
+                        Add Linear
+                    </button>
+                </div>
+                <div className='py-8'>
+                    <button
+                        className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
+                        onClick={handleClearAll}
+                    >
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+
+        </div>
+        <div className='flex-grow'>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -113,15 +189,16 @@ export default function Flow() {
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
                 onNodeDragStart={handleOnNodeDragStart}
-                onNodeDragStop={handleOnNodeDragStop}>
+                onNodeDragStop={handleOnNodeDragStop}
+            >
                 <Background />
                 <Controls />
             </ReactFlow>
-
-            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handleOnClick}>Button</button>
-
-            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ms-5' onClick={handleAddConv1d}>Add Conv1d</button>
-
         </div>
+        </>
     )
-}
+};
+
+export default Flow;
+
+
