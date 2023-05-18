@@ -1,49 +1,61 @@
-import itertools
+
 from jinja2 import Environment, FileSystemLoader
-
-input_id = itertools.count()
-output_id = itertools.count()
-general_id = itertools.count()
-module_id = itertools.count()
-
+from functools import reduce
+import operator
 env = Environment(loader=FileSystemLoader('./template'))
 
 
 class Layer:
-    def __init__(self, is_input=False, is_output=False):
+    def __init__(self):
         self.visited = False
-        self.is_input = is_input
-        self.is_output = is_output
-
-
-class Input:
-    def __init__(self, input_shape):
-        self.input_shape = input_shape
-
-
-class Dropout():
-    def __init__(self, drop):
-        self.drop = drop
-        self.dropout_template = env.get_template('layers/dropout_template.py.j2')
-
-    def get_code(self):
-        code = self.dropout_template.render({
-            'drop': self.drop
-        })
-
-        return code
+        self.input_shape = self.output_shape = [0] * 3
 
 
 class MaxPool2d(Layer):
-    def __init__(self, kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False):
+    def __init__(self,
+                 kernel_size,
+                 stride=None,
+                 padding=0,
+                 dilation=1,
+                 return_indices=False,
+                 ceil_mode=False):
+
         super().__init__()
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
+
+        if isinstance(kernel_size, int):
+            self.kernel_size = (kernel_size, kernel_size)  
+        elif isinstance(kernel_size, tuple) and len(kernel_size) == 2:
+            self.kernel_size = kernel_size  # Use the provided tuple as is
+        else:
+            raise ValueError("Invalid kernel_size value. Expected an integer or a tuple of length 2.")
+        
+        if isinstance(stride, int):
+            self.stride = (stride, stride)  
+        elif isinstance(stride, tuple) and len(stride) == 2:
+            self.stride = stride  # Use the provided tuple as is
+        else:
+            self.stride = self.kernel_size
+        
+        if isinstance(padding, int):
+            self.padding = (padding, padding)  
+        elif isinstance(padding, tuple) and len(padding) == 2:
+            self.padding = padding  # Use the provided tuple as is
+        else:
+            raise ValueError("Invalid padding value. Expected an integer or a tuple of length 2.")
+        
         self.dilation = dilation
         self.return_indices = return_indices
         self.ceil_mode = ceil_mode
-        self.maxpool1d_template = env.get_template('layers/maxpool2d_template.py.j2')
+        self.maxpool1d_template = env.get_template(
+            'layers/maxpool2d_template.py.j2')
+        
+        
+    def calculate_output_shape(self):
+        self.output_shape[0] = self.input_shape[0]
+        self.output_shape[1] = ((self.input_shape[1] + 2 * self.padding[0] - 
+                                 self.dilation * (self.kernel_size[0] - 1) - 1)//self.stride[0]) + 1
+        self.output_shape[2] = ((self.input_shape[2] + 2 * self.padding[1] - 
+                                 self.dilation * (self.kernel_size[1] - 1) - 1)//self.stride[1]) + 1
 
     def get_code(self):
         code = self.maxpool1d_template.render(
@@ -60,13 +72,24 @@ class MaxPool2d(Layer):
         return code
 
 
-class MaxPool1d():
+class MaxPool1d:
     pass
 
 
 class Conv1d(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', is_input=False, is_output=False):
-        super().__init__(is_input, is_output)
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride=1,
+                 padding=0,
+                 dilation=1,
+                 groups=1,
+                 bias=True,
+                 padding_mode='zeros'):
+
+        super().__init__()
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -97,13 +120,45 @@ class Conv1d(Layer):
 
 
 class Conv2d(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', is_input=False, is_output=False, activation=None, dropout= None):
-        super().__init__(is_input, is_output)
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride=1,
+                 padding=0,
+                 dilation=1,
+                 groups=1,
+                 bias=True,
+                 padding_mode='zeros',
+                 activation=None,
+                 dropout=None):
+
+        super().__init__()
+
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
+        
+        if isinstance(kernel_size, int):
+            self.kernel_size = (kernel_size, kernel_size)  
+        elif isinstance(kernel_size, tuple) and len(kernel_size) == 2:
+            self.kernel_size = kernel_size  # Use the provided tuple as is
+        else:
+            raise ValueError("Invalid kernel_size value. Expected an integer or a tuple of length 2.")
+        
+        if isinstance(stride, int):
+            self.stride = (stride, stride)  
+        elif isinstance(stride, tuple) and len(stride) == 2:
+            self.stride = stride  # Use the provided tuple as is
+        else:
+            raise ValueError("Invalid stride value. Expected an integer or a tuple of length 2.")
+        
+        if isinstance(padding, int):
+            self.padding = (padding, padding)  
+        elif isinstance(padding, tuple) and len(padding) == 2:
+            self.padding = padding  # Use the provided tuple as is
+        else:
+            raise ValueError("Invalid padding value. Expected an integer or a tuple of length 2.")
+        
         self.dilation = dilation
         self.groups = groups
         self.bias = bias
@@ -111,6 +166,19 @@ class Conv2d(Layer):
         self.activation = activation
         self.dropout = dropout
         self.conv2d_template = env.get_template('layers/conv2d_template.py.j2')
+        
+    
+    def calculate_output_shape(self):
+        
+        if self.input_shape[0] != self.in_channels:
+            raise ValueError("input_shape[0] and in_channels do not match for {}".format(self))
+        
+        self.output_shape[0] = self.out_channels
+        self.output_shape[1] = ((self.input_shape[1] + 2 * self.padding[0] - 
+                                 self.dilation * (self.kernel_size[0] - 1) - 1)//self.stride[0]) + 1
+        self.output_shape[2] = ((self.input_shape[2] + 2 * self.padding[1] - 
+                                 self.dilation * (self.kernel_size[1] - 1) - 1)//self.stride[1]) + 1
+        
 
     def get_code(self):
         code = self.conv2d_template.render(
@@ -126,19 +194,28 @@ class Conv2d(Layer):
                 "padding_mode": self.padding_mode
             }
         )
-        
+
         if self.activation:
-            code = code + "\n" + env.get_template("/activations/{}_template.py.j2".format(self.activation)).render()
-            
+            code = code + "\n" + \
+                env.get_template(
+                    "/activations/{}_template.py.j2".format(self.activation)).render()
+
         if self.dropout:
-            code = code + "\n" + Dropout(self.dropout).get_code()   
-            
+            code = code + "\n" + Dropout(self.dropout).get_code()
+
         return code
 
 
 class Linear(Layer):
-    def __init__(self, in_features, out_features, bias=True, is_input=False, is_output=False, activation = None, dropout = None):
-        super().__init__(is_input, is_output)
+    def __init__(self,
+                 in_features,
+                 out_features,
+                 bias=True,
+                 activation=None,
+                 dropout=None):
+
+        super().__init__()
+
         self.in_features = in_features
         self.out_features = out_features
         self.bias = bias
@@ -146,6 +223,12 @@ class Linear(Layer):
         self.activation = activation
         self.dropout = dropout
         
+    def calculate_output_shape(self):
+        if self.in_features != self.input_shape:
+            raise ValueError('input_shape={} and in_features={} do not match for {}'.format(self.input_shape, self.in_features, self))
+        
+        self.output_shape = self.out_features
+
     def get_code(self):
         code = self.linear_template.render(
             {
@@ -154,31 +237,75 @@ class Linear(Layer):
                 'bias': self.bias,
             }
         )
-        
+
         if self.activation:
-            code = code + "\n" + env.get_template("/activations/{}_template.py.j2".format(self.activation)).render()
-            
+            code = code + "\n" + \
+                env.get_template(
+                    "/activations/{}_template.py.j2".format(self.activation)).render()
+
         if self.dropout:
-            code = code + "\n" + Dropout(self.dropout).get_code()    
+            code = code + "\n" + Dropout(self.dropout).get_code()
 
         return code
 
-class Flatten():
-    def __init__(self, start_dim = 1, end_dim = -1):
+
+class Flatten(Layer):
+    def __init__(self,
+                 start_dim=1,
+                 end_dim=-1):
+
+        super().__init__()
+        
         self.start_dim = start_dim
         self.end_dim = end_dim
-        self.flatten_template = env.get_template('layers/flatten_template.py.j2')
+        self.flatten_template = env.get_template(
+            'layers/flatten_template.py.j2')
+        
+    def calculate_output_shape(self):
+        self.output_shape = reduce(operator.mul, self.input_shape)
 
     def get_code(self):
         code = self.flatten_template.render({
-            'start_dim' : self.start_dim, 
-            'end_dim' : self.end_dim
+            'start_dim': self.start_dim,
+            'end_dim': self.end_dim
         })
-        
+
         return code
-    
+
+
+class Dropout(Layer):
+    def __init__(self, drop):
+        super().__init__()
+        self.drop = drop
+        self.dropout_template = env.get_template(
+            'layers/dropout_template.py.j2')
+        
+        
+    def calculate_output_shape(self):
+        self.output_shape = self.input_shape
+
+    def get_code(self):
+        code = self.dropout_template.render({
+            'drop': self.drop
+        })
+
+        return code
+
+
+class Input(Layer):
+    def __init__(self, input_shape):
+        super().__init__()
+        self.input_shape = input_shape
+        self.output_shape = input_shape
+
+
+class Output(Layer):
+    def __init__(self):
+        super().__init__()
+
+
 def main():
-    conv2d = Conv2d(3, 32, 3, stride=5, activation= 'relu')
+    conv2d = Conv2d(3, 32, 3, stride=5, activation='relu')
     linear = Linear(128, 64)
     maxpool1d = MaxPool2d(kernel_size=3, stride=2, padding=3)
     dropout = Dropout(0.2)
@@ -191,64 +318,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# class Linear():
-
-#     def __init__(self,
-#                 units = None,
-#                 activation = None,
-#                 dropout = None,
-#                 regularizer = None,
-#                 input_layer: bool = False,
-#                 output_layer: bool = False,
-#                 visited: bool = False):
-
-#         super().__init__()
-
-#         self.id = self.generate_id(input_layer, output_layer)
-#         self.units = units
-#         self.activation = activation
-#         self.dropout = dropout
-#         self.regularizer = regularizer
-#         self.input_layer = input_layer
-#         self.output_layer = output_layer
-#         self.next = None
-
-#         if self.input_layer == self.output_layer == True:
-#             raise ValueError('input_layer and output_layer cannot be true at the same time')
-
-
-#     # On printing the object
-#     def __str__(self):
-#         return "[id : {} units: {} activation: {} dropout: {}]" \
-#         .format(self.id, self.units, self.activation, self.dropout)
-
-#     # generate ids for the input which are going to be used for the layer names
-#     def generate_id(self, input_layer, output_layer):
-#         if input_layer:
-#             return "layer_" + str(next(input_id))
-#         if output_layer:
-#             return "layer_" + str(next(output_id))
-
-#         return "layer_" + str(next(general_id))
-
-#     # generate ids for the input which are going to be used for the variable names
-#     def generate_var_name(self):
-#         temp = self.id.split('_')
-
-#         if self.input_layer:
-#             return "inp_" + str(temp[1])
-#         elif self.output_layer:
-#             return "out_" + str(temp[1])
-#         else:
-#             return "x_" + str(temp[1])
-
-#     #
-#     def layer2code(self):
-#         var_name = self.generate_var_name()
-
-#         code = var_name + \
-#         " = " + "keras.layers.Dense(units = {}, activation = '{}')"\
-#             .format(self.units, self.activation)
-
-#         return (var_name, code)

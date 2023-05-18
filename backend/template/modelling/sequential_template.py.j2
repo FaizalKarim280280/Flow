@@ -1,6 +1,10 @@
 
 self.{{ block }} = nn.Sequential(
-    {% for layer in layers %}
-        {{- layer }},
+    {% for layer, shape in layer_shapes %}
+        {% for l in layer.split("\n")%}
+            {{- l }},         
+        # shape = ({{ shape|join(", ")}})
+        {% endfor %}
+    
     {% endfor %}
 )
