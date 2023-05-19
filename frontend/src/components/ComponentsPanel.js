@@ -2,23 +2,12 @@ import React from 'react';
 
 export function ComponentsPanel({ handleAddConv1d, handleAddConv2d, handleAddLinear, handleClearAll }) {
     return (
-        <div className='flex-none border bg-gray-50' style={{ "width": "15%" }}>
-            <div className='px-2 py-2'>
-                <h3 className='text-md'>Components</h3>
-                <hr className="h-px border bg-gray-200 mt-2" />
 
+        <div className='flex-none border-2 border-black px-8'>
+            <div className='flex flex-col items-center justify-center'>
+                <h3 className='text-2xl py-4'>Components</h3>
 
-                <div class="collapse">
-                    <input type="checkbox" />
-                    <div class="collapse-title text-xl font-medium">
-                        Click me to show/hide content
-                    </div>
-                    <div class="collapse-content">
-                        <p>hello</p>
-                    </div>
-                </div>
-
-                {/* <div className='py-8'>
+                <div className='py-8'>
                     <button
                         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
                         onClick={handleAddConv1d}
