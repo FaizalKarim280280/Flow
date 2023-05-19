@@ -6,8 +6,8 @@ export default function BatchNorm2d(props) {
     return (
 
         <>
-            <Handle type="source" position={Position.Left} id='left' style={{width: "10px", height : "10px", borderRadius: "50%"}}/>
-            <Handle type="target" position={Position.Right} style={{width: "10px", height : "10px", borderRadius: "50%"}}/>
+            <Handle type="source" position={Position.Left} id='left' style={{ width: "10px", height: "10px", borderRadius: "50%" }} />
+            <Handle type="target" position={Position.Right} style={{ width: "10px", height: "10px", borderRadius: "50%" }} />
 
             <div style={{
                 width: '80px',
