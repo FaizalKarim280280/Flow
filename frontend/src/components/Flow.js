@@ -73,15 +73,26 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv1d',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_channels : {},
-                    out_channels : {},
-                    kernel_size : {},
-                    stride : {},
-                    padding : {},
-                }
+                parameters: {
+                    in_channels: '',
+                    out_channels: '',
+                    kernel_size: '',
+                    stride: '',
+                    padding: '',
+                },
             },
         ]);
+
+        setParamValues((prevValues) => ({
+            ...prevValues,
+            [id]: {
+                in_channels: '',
+                out_channels: '',
+                kernel_size: '',
+                stride: '',
+                padding: '',
+            },
+        }));
     };
 
     const handleAddConv2d = () => {
@@ -96,14 +107,24 @@ const Flow = () => {
                 type: 'conv2d',
                 data: { opacity: '0.8' },
                 parameters : {
-                    in_channels : {},
-                    out_channels : {},
-                    kernel_size : {},
-                    stride : {},
-                    padding : {},
+                    in_channels : '',
+                    out_channels : '',
+                    kernel_size : '',
+                    stride : '',
+                    padding : '',
                 }
             },
         ]);
+        setParamValues((prevValues) => ({
+            ...prevValues,
+            [id]: {
+                in_channels: '',
+                out_channels: '',
+                kernel_size: '',
+                stride: '',
+                padding: '',
+            },
+        }));
     };
 
     const handleAddLinear = () => {
@@ -118,12 +139,20 @@ const Flow = () => {
                 type: 'linear',
                 data: { opacity: '0.8' },
                 parameters : {
-                    in_features : {},
-                    out_features : {},
-                    bias : {},
+                    in_features : '',
+                    out_features : '',
+                    bias : '',
                 }
             },
         ]);
+        setParamValues((prevValues) => ({
+            ...prevValues,
+            [id]: {
+                in_features : '',
+                out_features : '',
+                bias : '',
+            },
+        }));
     };
 
 
@@ -159,6 +188,17 @@ const Flow = () => {
     //     setSelectedNode(node);
     // };
 
+    const [paramValues, setParamValues] = useState({});
+
+    const handleParamChange = (nodeId, paramName, value) => {
+        setParamValues((prevParamValues) => ({
+            ...prevParamValues,
+            [nodeId]: {
+                ...prevParamValues[nodeId],
+                [paramName]: value,
+            },
+        }));
+    };
 
     return (
         <>
@@ -186,7 +226,11 @@ const Flow = () => {
             </ReactFlow>
         </div>
             <div className='flex-none border-2 border-black px-8'>
-                <NodeProperties selectedNode={selectedNode} />
+                <NodeProperties
+                    selectedNode={selectedNode}
+                    paramValues={paramValues}
+                    handleParamChange={handleParamChange}
+                />
             </div>
         </>
     )
