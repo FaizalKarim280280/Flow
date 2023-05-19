@@ -1,6 +1,7 @@
 import React from 'react';
 
 export function NodeProperties({ selectedNode, paramValues, handleParamChange }) {
+
     if (!selectedNode) {
         return <div className='flex-none border bg-gray-50' style={{ "width": "15%"}}>No node selected.</div>;
     }

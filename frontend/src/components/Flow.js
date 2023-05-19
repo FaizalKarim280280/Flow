@@ -125,12 +125,12 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv2d',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_channels : '',
-                    out_channels : '',
-                    kernel_size : '',
-                    stride : '',
-                    padding : '',
+                parameters: {
+                    in_channels: '',
+                    out_channels: '',
+                    kernel_size: '',
+                    stride: '',
+                    padding: '',
                 }
             },
         ]);
@@ -157,19 +157,19 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'linear',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_features : '',
-                    out_features : '',
-                    bias : '',
+                parameters: {
+                    in_features: '',
+                    out_features: '',
+                    bias: '',
                 }
             },
         ]);
         setParamValues((prevValues) => ({
             ...prevValues,
             [id]: {
-                in_features : '',
-                out_features : '',
-                bias : '',
+                in_features: '',
+                out_features: '',
+                bias: '',
             },
         }));
     };
@@ -275,7 +275,7 @@ const Flow = () => {
                 handleAddLinear={handleAddLinear}
                 handleClearAll={handleClearAll}
             />
-            <div style={{ "width": "70%"}}>
+            <div style={{ "width": "80%" }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -287,18 +287,18 @@ const Flow = () => {
                     onNodeDragStop={handleOnNodeDragStop}
                     onClick={clearSelectedNode}
                 // onNodeClick={handleOnNodeClick}
-            >
-                <Background />
-                <Controls />
-            </ReactFlow>
-        </div>
-            <div className='flex-none border-2 border-black px-8'>
-                <NodeProperties
-                    selectedNode={selectedNode}
-                    paramValues={paramValues}
-                    handleParamChange={handleParamChange}
-                />
+                >
+                    <Background />
+                    <Controls />
+                </ReactFlow>
             </div>
+            
+            <NodeProperties
+                selectedNode={selectedNode}
+                paramValues={paramValues}
+                handleParamChange={handleParamChange}
+            />
+
         </>
     )
 };
