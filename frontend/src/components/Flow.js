@@ -5,21 +5,40 @@ import { useState, useCallback } from 'react';
 import Conv1d from './layers/Conv1d';
 import Conv2d from './layers/Conv2d';
 import Linear from './layers/Linear';
-import {NodeProperties} from "./NodeProperties";
-import {ComponentsPanel} from "./ComponentsPanel";
+import Maxpool1d from './layers/Maxpool1d';
+import Maxpool2d from './layers/Maxpool2d';
+import BatchNorm2d from './layers/BatchNorm2d';
+import BatchNorm1d from './layers/BatchNorm1d';
+import Input from './layers/InputLayer';
+import Output from './layers/OutputLayer';
+import { NodeProperties } from "./NodeProperties";
+import { ComponentsPanel } from "./ComponentsPanel";
 
 // define the node types
 const nodeTypes = {
     conv1d: Conv1d,
     conv2d: Conv2d,
-    linear: Linear
+    linear: Linear,
+    maxpool1d: Maxpool1d,
+    maxpool2d: Maxpool2d,
+    batchnorm2d: BatchNorm2d,
+    batchnorm1d: BatchNorm1d,
+    inputLayer: Input,
+    outputLayer: Output
 }
 
 // store the number of each layers to use it later for ids
 let nums = {
-    conv1d: 1,
-    conv2d: 1,
-    linear: 1
+    conv1d: 0,
+    conv2d: 0,
+    linear: 0,
+    maxpool1d: 0,
+    maxpool2d: 0,
+    batchnorm2d: 0,
+    batchnorm1d: 0,
+    inputLayer: 0,
+    outputLayer: 0
+
 }
 
 const Flow = () => {
@@ -106,12 +125,12 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv2d',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_channels : '',
-                    out_channels : '',
-                    kernel_size : '',
-                    stride : '',
-                    padding : '',
+                parameters: {
+                    in_channels: '',
+                    out_channels: '',
+                    kernel_size: '',
+                    stride: '',
+                    padding: '',
                 }
             },
         ]);
@@ -138,19 +157,19 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'linear',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_features : '',
-                    out_features : '',
-                    bias : '',
+                parameters: {
+                    in_features: '',
+                    out_features: '',
+                    bias: '',
                 }
             },
         ]);
         setParamValues((prevValues) => ({
             ...prevValues,
             [id]: {
-                in_features : '',
-                out_features : '',
-                bias : '',
+                in_features: '',
+                out_features: '',
+                bias: '',
             },
         }));
     };
@@ -188,6 +207,35 @@ const Flow = () => {
     //     setSelectedNode(node);
     // };
 
+
+
+
+    const handleAddInput = () => {
+        nums['inputLayer'] += 1;
+        const id = 'inp_' + nums['inputLayer']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'inputLayer',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    
+    const handleAddOutput = () => {
+        nums['outputLayer'] += 1;
+        const id = 'out_' + nums['outputLayer']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'outputLayer',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+
     const [paramValues, setParamValues] = useState({});
 
     const handleParamChange = (nodeId, paramName, value) => {
@@ -208,30 +256,30 @@ const Flow = () => {
                 handleAddLinear={handleAddLinear}
                 handleClearAll={handleClearAll}
             />
-        <div className='flex-grow'>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                nodeTypes={nodeTypes}
-                onNodeDragStart={handleOnNodeDragStart}
-                onNodeDragStop={handleOnNodeDragStop}
-                onClick={clearSelectedNode}
+            <div style={{ "width": "80%" }}>
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    nodeTypes={nodeTypes}
+                    onNodeDragStart={handleOnNodeDragStart}
+                    onNodeDragStop={handleOnNodeDragStop}
+                    onClick={clearSelectedNode}
                 // onNodeClick={handleOnNodeClick}
-            >
-                <Background />
-                <Controls />
-            </ReactFlow>
-        </div>
-            <div className='flex-none border-2 border-black px-8'>
-                <NodeProperties
-                    selectedNode={selectedNode}
-                    paramValues={paramValues}
-                    handleParamChange={handleParamChange}
-                />
+                >
+                    <Background />
+                    <Controls />
+                </ReactFlow>
             </div>
+            
+            <NodeProperties
+                selectedNode={selectedNode}
+                paramValues={paramValues}
+                handleParamChange={handleParamChange}
+            />
+
         </>
     )
 };
