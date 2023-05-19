@@ -5,6 +5,8 @@ import { useState, useCallback } from 'react';
 import Conv1d from './layers/Conv1d';
 import Conv2d from './layers/Conv2d';
 import Linear from './layers/Linear';
+import {NodeProperties} from "./NodeProperties";
+import {ComponentsPanel} from "./ComponentsPanel";
 
 // define the node types
 const nodeTypes = {
@@ -20,33 +22,10 @@ let nums = {
     linear: 1
 }
 
-export default function Flow() {
+const Flow = () => {
 
     // list of sample nodes
-    const initialNodes = [
-        {
-            id: 'conv1d_' + nums['conv1d'],
-            position: { x: 0, y: 0 },
-            type: 'conv1d',
-            data: { opacity: 0.8 }
-
-        },
-        {
-            id: 'conv2d_' + nums['conv2d'],
-            position: { x: 100, y: 100 },
-            type: 'conv2d',
-            data: { opacity: 0.8 }
-        },
-
-        {
-            id: 'linear',
-            position: { x: 200, y: 100 },
-            type: 'linear',
-            data: { opacity: 0.8 }
-        },
-    ];
-
-
+    const initialNodes = [];
 
     const initialEdges = [
         // { id: 'edge-1', source: '2', target: '1', sourceHandle: 'left'}
@@ -74,25 +53,84 @@ export default function Flow() {
         [setEdges]
     );
 
-    const handleOnClick = () => {
-        console.log(edges);
-    }
+    // const handleOnClick = () => {
+    //     console.log(edges);
+    // }
+    const [conv1dCount, setConv1dCount] = useState(2);
+    const [conv2dCount, setConv2dCount] = useState(2);
+    const [linearCount, setLinearCount] = useState(2);
+    const [selectedNode, setSelectedNode] = useState(null);
 
     // button to add new conv1d layer
     const handleAddConv1d = () => {
-        nums['conv1d'] += 1;
-        const id = 'conv1d_' + nums['conv1d']
+        setConv1dCount((prevCount) => prevCount + 1);
+        const id = 'conv1d_' + conv1dCount;
 
-        setNodes((prev) => [...prev, {
-            id: id,
-            position: { x: 300, y: 300 },
-            type: 'conv1d'
-        }])
-    }
+        setNodes((prev) => [
+            ...prev,
+            {
+                id: id,
+                position: { x: 0, y: 0 },
+                type: 'conv1d',
+                data: { opacity: '0.8' },
+                parameters : {
+                    in_channels : {},
+                    out_channels : {},
+                    kernel_size : {},
+                    stride : {},
+                    padding : {},
+                }
+            },
+        ]);
+    };
+
+    const handleAddConv2d = () => {
+        setConv2dCount((prevCount) => prevCount + 1);
+        const id = 'conv2d_' + conv2dCount;
+
+        setNodes((prev) => [
+            ...prev,
+            {
+                id: id,
+                position: { x: 0, y: 0 },
+                type: 'conv2d',
+                data: { opacity: '0.8' },
+                parameters : {
+                    in_channels : {},
+                    out_channels : {},
+                    kernel_size : {},
+                    stride : {},
+                    padding : {},
+                }
+            },
+        ]);
+    };
+
+    const handleAddLinear = () => {
+        setLinearCount((prevCount) => prevCount + 1);
+        const id = 'linear_' + linearCount;
+
+        setNodes((prev) => [
+            ...prev,
+            {
+                id: id,
+                position: { x: 0, y: 0 },
+                type: 'linear',
+                data: { opacity: '0.8' },
+                parameters : {
+                    in_features : {},
+                    out_features : {},
+                    bias : {},
+                }
+            },
+        ]);
+    };
+
 
     // when a node is dragged reduce its opacity to 0.5
     const handleOnNodeDragStart = (event, node) => {
         node.data['opacity'] = 0.5;
+        setSelectedNode(node);
     }
 
     // when dragging is stopped, revert back to the previous value
@@ -100,11 +138,37 @@ export default function Flow() {
         node.data['opacity'] = 0.8;
     }
 
+    const handleClearAll = () => {
+        setNodes([]);
+        setEdges([]);
+        setConv1dCount(1);
+        setConv2dCount(1);
+        setLinearCount(1);
+        nums = {
+            conv1d: 1,
+            conv2d: 1,
+            linear: 1,
+        };
+    };
 
+    const clearSelectedNode = () => {
+        setSelectedNode(null);
+    };
+
+    // const handleOnNodeClick = (event, node) => {
+    //     setSelectedNode(node);
+    // };
 
 
     return (
-        <div style={{ height: "600px" }}>
+        <>
+            <ComponentsPanel
+                handleAddConv1d={handleAddConv1d}
+                handleAddConv2d={handleAddConv2d}
+                handleAddLinear={handleAddLinear}
+                handleClearAll={handleClearAll}
+            />
+        <div className='flex-grow'>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -113,15 +177,21 @@ export default function Flow() {
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
                 onNodeDragStart={handleOnNodeDragStart}
-                onNodeDragStop={handleOnNodeDragStop}>
+                onNodeDragStop={handleOnNodeDragStop}
+                onClick={clearSelectedNode}
+                // onNodeClick={handleOnNodeClick}
+            >
                 <Background />
                 <Controls />
             </ReactFlow>
-
-            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handleOnClick}>Button</button>
-
-            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ms-5' onClick={handleAddConv1d}>Add Conv1d</button>
-
         </div>
+            <div className='flex-none border-2 border-black px-8'>
+                <NodeProperties selectedNode={selectedNode} />
+            </div>
+        </>
     )
-}
+};
+
+export default Flow;
+
+
