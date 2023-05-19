@@ -19,10 +19,12 @@ export default function InputLayer(props) {
                     borderRadius: '5px',
                     opacity: props.data['opacity'],
                 }}>
+
+                <div className='flex flex-column justify-center'>
+                    <p className='p-1'>{props.id}</p>
+                </div>
                 
             </div>
-
-            <p className=''>{props.id}</p>
 
         </>
     )
