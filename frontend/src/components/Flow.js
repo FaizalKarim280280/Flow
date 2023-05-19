@@ -5,8 +5,8 @@ import { useState, useCallback } from 'react';
 import Conv1d from './layers/Conv1d';
 import Conv2d from './layers/Conv2d';
 import Linear from './layers/Linear';
-import {NodeProperties} from "./NodeProperties";
-import {ComponentsPanel} from "./ComponentsPanel";
+import { NodeProperties } from "./NodeProperties";
+import { ComponentsPanel } from "./ComponentsPanel";
 
 // define the node types
 const nodeTypes = {
@@ -73,12 +73,12 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv1d',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_channels : {},
-                    out_channels : {},
-                    kernel_size : {},
-                    stride : {},
-                    padding : {},
+                parameters: {
+                    in_channels: {},
+                    out_channels: {},
+                    kernel_size: {},
+                    stride: {},
+                    padding: {},
                 }
             },
         ]);
@@ -95,12 +95,12 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'conv2d',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_channels : {},
-                    out_channels : {},
-                    kernel_size : {},
-                    stride : {},
-                    padding : {},
+                parameters: {
+                    in_channels: {},
+                    out_channels: {},
+                    kernel_size: {},
+                    stride: {},
+                    padding: {},
                 }
             },
         ]);
@@ -117,10 +117,10 @@ const Flow = () => {
                 position: { x: 0, y: 0 },
                 type: 'linear',
                 data: { opacity: '0.8' },
-                parameters : {
-                    in_features : {},
-                    out_features : {},
-                    bias : {},
+                parameters: {
+                    in_features: {},
+                    out_features: {},
+                    bias: {},
                 }
             },
         ]);
@@ -168,26 +168,26 @@ const Flow = () => {
                 handleAddLinear={handleAddLinear}
                 handleClearAll={handleClearAll}
             />
-        <div className='flex-grow'>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                nodeTypes={nodeTypes}
-                onNodeDragStart={handleOnNodeDragStart}
-                onNodeDragStop={handleOnNodeDragStop}
-                onClick={clearSelectedNode}
+            <div style={{ "width": "70%" }}>
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    nodeTypes={nodeTypes}
+                    onNodeDragStart={handleOnNodeDragStart}
+                    onNodeDragStop={handleOnNodeDragStop}
+                    onClick={clearSelectedNode}
                 // onNodeClick={handleOnNodeClick}
-            >
-                <Background />
-                <Controls />
-            </ReactFlow>
-        </div>
-            <div className='flex-none border-2 border-black px-8'>
-                <NodeProperties selectedNode={selectedNode} />
+                >
+                    <Background />
+                    <Controls />
+                </ReactFlow>
             </div>
+
+            <NodeProperties selectedNode={selectedNode} />
+            
         </>
     )
 };

@@ -12,13 +12,14 @@ export function NodeProperties({ selectedNode }) {
     };
 
     if (!selectedNode) {
-        return <div>No node selected.</div>;
+        return <div className='flex-none border bg-gray-100' style={{ "width": "15%" }}>No node selected.</div>;
     }
 
     const { id, type } = selectedNode;
 
     return (
-        <div>
+        <div className='flex-none border bg-gray-50' style={{ "width": "15%" }}>
+
             <h3 className='text-2xl py-4'>Properties</h3>
             <p>ID: {id}</p>
             <p>Type: {type}</p>
