@@ -254,6 +254,91 @@ const Flow = () => {
         }])
     }
 
+    // button to add new conv1d layer
+    const handleAddConv1d = () => {
+        nums['conv1d'] += 1;
+        const id = 'conv1d_' + nums['conv1d']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'conv1d',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    const handleAddConv2d = () => {
+        nums['conv2d'] += 1;
+        const id = 'conv2d_' + nums['conv2d']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'conv2d',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    const handleAddBatchNorm1d = () => {
+        nums['batchnorm1d'] += 1;
+        const id = 'bn1d_' + nums['batchnorm1d']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'batchnorm1d',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    const handleAddBatchNorm2d = () => {
+        nums['batchnorm2d'] += 1;
+        const id = 'bn2d_' + nums['batchnorm2d']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'batchnorm2d',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    const handleAddInput = () => {
+        nums['inputLayer'] += 1;
+        const id = 'inp_' + nums['inputLayer']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'inputLayer',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    const handleAddLinear = () => {
+        nums['linear'] += 1;
+        const id = 'linear_' + nums['linear']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'linear',
+            data: { opacity: '0.8' }
+        }])
+    }
+
+    const handleAddOutput = () => {
+        nums['outputLayer'] += 1;
+        const id = 'out_' + nums['outputLayer']
+
+        setNodes((prev) => [...prev, {
+            id: id,
+            position: { x: 300, y: 300 },
+            type: 'outputLayer',
+            data: { opacity: '0.8' }
+        }])
+    }
+
 
     const [paramValues, setParamValues] = useState({});
 
