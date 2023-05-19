@@ -27,7 +27,7 @@ export default function Linear(props) {
                 
             </div>
 
-            <p className=''>Linear</p>
+            {/* <p className=''>Linear</p> */}
 
 
         </>

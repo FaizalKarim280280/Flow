@@ -2,14 +2,14 @@ import React from 'react';
 
 export function NodeProperties({ selectedNode, paramValues, handleParamChange }) {
     if (!selectedNode) {
-        return <div className='flex-none border bg-gray-100' style={{ "width": "15%" }}>No node selected.</div>;
+        return <div className='flex-none border bg-gray-50' style={{ "width": "15%"}}>No node selected.</div>;
     }
 
     // Extract the properties of the selected node
     const { id, type, data, parameters } = selectedNode;
 
     return (
-        <div className='flex-none border bg-gray-50' style={{ "width": "15%" }}>
+        <div className='flex-none border bg-gray-50' style={{ "width": "15%"}}>
 
             <h3 className='text-2xl py-4'>Properties</h3>
             <p className='mt-4'>ID: {id}</p>

@@ -206,30 +206,6 @@ const Flow = () => {
     // const handleOnNodeClick = (event, node) => {
     //     setSelectedNode(node);
     // };
-    // button to add new conv1d layer
-    const handleAddConv1d = () => {
-        nums['conv1d'] += 1;
-        const id = 'conv1d_' + nums['conv1d']
-
-        setNodes((prev) => [...prev, {
-            id: id,
-            position: { x: 300, y: 300 },
-            type: 'conv1d',
-            data: { opacity: '0.8' }
-        }])
-    }
-
-    const handleAddConv2d = () => {
-        nums['conv2d'] += 1;
-        const id = 'conv2d_' + nums['conv2d']
-
-        setNodes((prev) => [...prev, {
-            id: id,
-            position: { x: 300, y: 300 },
-            type: 'conv2d',
-            data: { opacity: '0.8' }
-        }])
-    }
 
     const handleAddBatchNorm1d = () => {
         nums['batchnorm1d'] += 1;
@@ -266,19 +242,6 @@ const Flow = () => {
             data: { opacity: '0.8' }
         }])
     }
-
-    const handleAddLinear = () => {
-        nums['linear'] += 1;
-        const id = 'linear_' + nums['linear']
-
-        setNodes((prev) => [...prev, {
-            id: id,
-            position: { x: 300, y: 300 },
-            type: 'linear',
-            data: { opacity: '0.8' }
-        }])
-    }
-
     const handleAddOutput = () => {
         nums['outputLayer'] += 1;
         const id = 'out_' + nums['outputLayer']
@@ -312,7 +275,7 @@ const Flow = () => {
                 handleAddLinear={handleAddLinear}
                 handleClearAll={handleClearAll}
             />
-            <div style={{ "width": "70%" }}>
+            <div style={{ "width": "70%"}}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
