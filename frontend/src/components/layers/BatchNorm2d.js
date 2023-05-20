@@ -10,7 +10,7 @@ export default function BatchNorm2d(props) {
             <Handle type="target" position={Position.Right} style={{ width: "10px", height: "10px", borderRadius: "50%" }} />
 
             <div style={{
-                width: '80px',
+                width: '150px',
                 height: '80px',
                 background: '#E53935',
                 borderRadius: '3px',
